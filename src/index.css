@@ -1,6 +1,3 @@
-* {
-  box-sizing: border-box;
-}
 html,
 body,
 div {
@@ -11,13 +8,3 @@ div {
   font: inherit;
   vertical-align: baseline;
 }
-
-input,
-textarea {
-  margin-bottom: 15px !important;
-}
-
-/* .fields > div {
-  border: 1px dotted darkorange;
-  margin: 2px;
-} */
