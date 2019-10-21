@@ -31,12 +31,8 @@
     "@contentful/forma-36-fcss": "^0.0.20",
     "@contentful/forma-36-react-components": "^3.11.3",
     "@contentful/forma-36-tokens": "^0.3.0",
-    "@contentful/rich-text-html-renderer": "^13.4.0",
     "@tinymce/tinymce-react": "^3.3.2",
-    "alloyeditor": "^1.5.1",
     "contentful-ui-extensions-sdk": "3.9.0",
-    "create-react-class": "^15.6.3",
-    "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },

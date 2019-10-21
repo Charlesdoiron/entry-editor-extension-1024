@@ -2,8 +2,6 @@ import React from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 
 import PropTypes from 'prop-types';
-import AlloyEditorComponent from './alloyeditor';
-import twoParagraphs from './img/two_paragraphs.png';
 import { render } from 'react-dom';
 
 import {
@@ -25,15 +23,21 @@ import '@contentful/forma-36-react-components/dist/styles.css';
 import '@contentful/forma-36-fcss/dist/styles.css';
 import './index.css';
 
-/**
- * To use this demo create a Content Type with the following fields:
- *  title: Short text
- *  body: Long text
- *  hasAbstract: Boolean
- *  abstract: Long text
- *
- *  See https://github.com/contentful/create-contentful-extension/blob/master/docs/examples/entry-editor-content-model.json for details.
- */
+const editorOptions = {
+  height: 300,
+  menubar: true,
+  plugins: [
+    'advlist autolink lists link image charmap print preview anchor',
+    'searchreplace visualblocks code fullscreen',
+    'insertdatetime media table paste code help wordcount'
+  ],
+  toolbar:
+    'undo redo | formatselect | bold italic backcolor | \
+                    alignleft aligncenter alignright alignjustify | \
+                    bullist numlist outdent indent | removeformat | help'
+};
+
+const EDITOR_API = 'doeu6yjrpctwmwa37nr6wujdjwuugp94skyr34bafbxr3ly3';
 
 export class App extends React.Component {
   static propTypes = {
@@ -45,14 +49,13 @@ export class App extends React.Component {
 
     this.state = {
       isOpen: false,
-      title: props.sdk.entry.fields.title.getValue(),
+      titleParagraph: props.sdk.entry.fields.titleParagraph.getValue() || '',
       quote: props.sdk.entry.fields.quote.getValue(),
       quoteForQuoteAndText: props.sdk.entry.fields.quoteForQuoteAndText.getValue(),
       textForQuoteAndText: props.sdk.entry.fields.textForQuoteAndText.getValue(),
       textOneColumn: props.sdk.entry.fields.textOneColumn.getValue(),
-      textFirstColumn: props.sdk.entry.fields.textFirstColumn.getValue(),
-      textSecondColumn: props.sdk.entry.fields.textSecondColumn.getValue(),
-      textThirdColumn: props.sdk.entry.fields.textThirdColumn.getValue(),
+      textTwoColumns: props.sdk.entry.fields.textTwoColumns.getValue(),
+      textThreeColumns: props.sdk.entry.fields.textThreeColumns.getValue(),
       imageForImageAndText: props.sdk.entry.fields.imageForImageAndText.getValue(),
       textForImageAndText: props.sdk.entry.fields.textForImageAndText.getValue(),
       show: ''
@@ -60,7 +63,7 @@ export class App extends React.Component {
   }
 
   onTitleChangeHandler = event => {
-    this.props.sdk.entry.fields.title.setValue(event.target.value);
+    this.props.sdk.entry.fields.titleParagraph.setValue(event.target.value);
   };
 
   onBodyChangeHandler = event => {
@@ -77,9 +80,11 @@ export class App extends React.Component {
     this.setState({ isOpen: !this.state.isOpen });
   };
 
-  handleEditorChange = event => {
-    this.setState({ quote: event.target.value });
-    this.props.sdk.entry.fields.quote.setValue(event.target.getContent());
+  handleEditorChange = (event, module) => {
+    console.log('event', event);
+    console.log('module', module);
+    this.setState({ [module]: event.target.value });
+    this.props.sdk.entry.fields[module].setValue(event.target.getContent());
   };
 
   render() {
@@ -91,10 +96,10 @@ export class App extends React.Component {
         <TextInput
           testId="field-title"
           onChange={this.onTitleChangeHandler}
-          value={this.state.title}
+          value={this.state.titleParagraph}
         />
         <SectionHeading>Liste des modules</SectionHeading>
-        <p>{this.state.show}</p>
+
         <Dropdown
           isOpen={this.state.isOpen}
           toggleElement={
@@ -103,7 +108,7 @@ export class App extends React.Component {
               buttonType="muted"
               indicateDropdown
               onClick={e => this.setState({ isOpen: !this.state.isOpen })}>
-              Liste des Modules
+              Selectionner un module
             </Button>
           }>
           <DropdownList>
@@ -113,13 +118,13 @@ export class App extends React.Component {
               Quote & Text
             </DropdownListItem>
             <DropdownListItem isTitle>Paragraph</DropdownListItem>
-            <DropdownListItem onClick={e => this.onSelectModule('one_column')}>
+            <DropdownListItem onClick={e => this.onSelectModule('textOneColumn')}>
               Text - One column
             </DropdownListItem>
-            <DropdownListItem onClick={e => this.onSelectModule('two_column')}>
+            <DropdownListItem onClick={e => this.onSelectModule('textTwoColumns')}>
               Text - Two columns
             </DropdownListItem>
-            <DropdownListItem onClick={e => this.onSelectModule('three_column')}>
+            <DropdownListItem onClick={e => this.onSelectModule('textThreeColumns')}>
               Text - Three column
             </DropdownListItem>
             <DropdownListItem isTitle>Image & Text</DropdownListItem>
@@ -135,55 +140,89 @@ export class App extends React.Component {
               <SectionHeading>Quote</SectionHeading>
               <Editor
                 initialValue={this.state.quote}
-                apiKey="doeu6yjrpctwmwa37nr6wujdjwuugp94skyr34bafbxr3ly3"
-                init={{
-                  height: 500,
-                  menubar: false,
-                  plugins: [
-                    'advlist autolink lists link image charmap print preview anchor',
-                    'searchreplace visualblocks code fullscreen',
-                    'insertdatetime media table paste code help wordcount'
-                  ],
-                  toolbar:
-                    'undo redo | formatselect | bold italic backcolor | \
-             alignleft aligncenter alignright alignjustify | \
-             bullist numlist outdent indent | removeformat | help'
-                }}
-                onChange={this.handleEditorChange}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'quote')}
               />
-
-              {/* <Textarea onChange={this.onBodyChangeHandler} value={this.state.quote} /> */}
             </FieldGroup>
-            {/* 
-            <AlloyEditorComponent container="editable" onChange={this.onBodyChangeHandler}>
-              <TextInput
-                testId="field-title"
-                onChange={this.onQuoteForQuoteAndText}
-                value={this.state.quoteForQuoteAndText}
-              />
-            </AlloyEditorComponent> */}
           </div>
         )}
-
-        {/* {this.state.show === 'quote_and_text' && (
-          <React.Fragment>
-            <SectionHeading>Quote & Text</SectionHeading>
-            <img src={twoParagraphs} />
-
+        {this.state.show === 'quote_and_text' && (
+          <div>
             <FieldGroup row={false}>
-              <Textarea
-                testId="field-quoteForQuoteAndText"
-                onChange={this.onBodyChangeHandler}
-                value={this.state.quoteForQuoteAndText}
+              <SectionHeading>Quote & Text</SectionHeading>
+              <Editor
+                initialValue={this.state.quoteForQuoteAndText}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'quoteForQuoteAndText')}
               />
-              <Textarea
-                testId="field-textForQuoteAndText"
-                onChange={this.onBodyChangeHandler}
-                value={this.state.textForQuoteAndText}
+              <Editor
+                initialValue={this.state.textForQuoteAndText}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textForQuoteAndText')}
               />
             </FieldGroup>
-          </React.Fragment>
-        )} */}
+          </div>
+        )}
+        {this.state.show === 'textOneColumn' && (
+          <div>
+            <FieldGroup row={false}>
+              <SectionHeading>Text one column</SectionHeading>
+              <Editor
+                initialValue={this.state.textOneColumn}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textOneColumn')}
+              />
+            </FieldGroup>
+          </div>
+        )}
+        {this.state.show === 'textTwoColumns' && (
+          <div>
+            <SectionHeading>Text two column</SectionHeading>
+            <FieldGroup row={true}>
+              <Editor
+                initialValue={this.state.textOneColumn}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textOneColumn')}
+              />
+              <Editor
+                initialValue={this.state.textTwoColumns}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textTwoColumns')}
+              />
+            </FieldGroup>
+          </div>
+        )}
+        {this.state.show === 'textThreeColumns' && (
+          <div>
+            <FieldGroup row={false}>
+              <SectionHeading>Text two column</SectionHeading>
+              <Editor
+                initialValue={this.state.textOneColumn}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textOneColumn')}
+              />
+              <Editor
+                initialValue={this.state.textTwoColumns}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textTwoColumns')}
+              />
+              <Editor
+                initialValue={this.state.textThreeColumns}
+                apiKey={EDITOR_API}
+                init={editorOptions}
+                onChange={e => this.handleEditorChange(e, 'textThreeColumns')}
+              />
+            </FieldGroup>
+          </div>
+        )}
       </Form>
     );
   }
